@@ -18,7 +18,6 @@ class PullRequest(Base):
     additions: Mapped[int] = mapped_column(Integer, default=0)
     deletions: Mapped[int] = mapped_column(Integer, default=0)
     changed_files: Mapped[int] = mapped_column(Integer, default=0)
-
     reviews: Mapped[list["Review"]] = relationship(back_populates="pull_request")
 
 
@@ -30,5 +29,4 @@ class Review(Base):
     reviewer: Mapped[str] = mapped_column(String, nullable=False)
     state: Mapped[str] = mapped_column(String, nullable=False)
     submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-
     pull_request: Mapped["PullRequest"] = relationship(back_populates="reviews")
