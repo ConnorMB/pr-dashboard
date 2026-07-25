@@ -23,7 +23,8 @@ app.dependency_overrides[get_session] = _override_session
 client = TestClient(app)
 
 
-def test_ingest_endpoint():
+def test_ingest_endpoint(monkeypatch):
+    monkeypatch.setenv("GITHUB_REPO", "octocat/hello")
     with patch("app.main.sync_repository", return_value={"pull_requests": 3, "reviews": 5}):
         response = client.post("/ingest")
     assert response.status_code == 200
