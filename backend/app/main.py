@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db import SessionLocal, init_db
 from app.ingest import sync_repository
-from app.metrics import (pr_size_distribution,review_turnaround_hours,time_to_merge_hours)
+from app.metrics import (pr_size_distribution,review_turnaround_hours,time_to_merge_hours,)
 
 
 @asynccontextmanager
