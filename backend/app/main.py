@@ -2,11 +2,16 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal, init_db
 from app.ingest import sync_repository
-from app.metrics import (pr_size_distribution,review_turnaround_hours,time_to_merge_hours,)
+from app.metrics import (
+    pr_size_distribution,
+    review_turnaround_hours,
+    time_to_merge_hours,
+)
 
 
 @asynccontextmanager
@@ -16,6 +21,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="PR Analytics Dashboard", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "https://pr-dashboard-1.onrender.com",
+    ],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def get_session():
