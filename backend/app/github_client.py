@@ -28,17 +28,27 @@ def fetch_pull_requests(owner: str, repo: str, token: str | None) -> list[dict]:
                         "created_at": raw["created_at"],
                         "merged_at": raw["merged_at"],
                         "closed_at": raw["closed_at"],
-                        "additions": raw["additions"],
-                        "deletions": raw["deletions"],
-                        "changed_files": raw["changed_files"],
                     }
                 )
 
             next_url = response.links.get("next", {}).get("url")
             url = next_url
-            params = {}  # next_url already carries its own query params
+            params = {}
 
     return results
+
+
+def fetch_pull_request_detail(owner: str, repo: str, pr_number: int, token: str | None) -> dict:
+    url = f"{BASE_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
+    with httpx.Client(headers=_headers(token)) as client:
+        response = client.get(url)
+        response.raise_for_status()
+        raw = response.json()
+        return {
+            "additions": raw["additions"],
+            "deletions": raw["deletions"],
+            "changed_files": raw["changed_files"],
+        }
 
 
 def fetch_reviews(owner: str, repo: str, pr_number: int, token: str | None) -> list[dict]:

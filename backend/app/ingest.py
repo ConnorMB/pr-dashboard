@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from app.github_client import fetch_pull_requests, fetch_reviews
+from app.github_client import fetch_pull_request_detail, fetch_pull_requests, fetch_reviews
 from app.models import PullRequest, Review
 
 
@@ -21,14 +21,16 @@ def sync_repository(session: Session, owner: str, repo: str, token: str | None) 
             existing = PullRequest(number=raw["number"])
             session.add(existing)
 
+        detail = fetch_pull_request_detail(owner, repo, raw["number"], token)
+
         existing.title = raw["title"]
         existing.author = raw["author"]
         existing.created_at = _parse(raw["created_at"])
         existing.merged_at = _parse(raw["merged_at"])
         existing.closed_at = _parse(raw["closed_at"])
-        existing.additions = raw["additions"]
-        existing.deletions = raw["deletions"]
-        existing.changed_files = raw["changed_files"]
+        existing.additions = detail["additions"]
+        existing.deletions = detail["deletions"]
+        existing.changed_files = detail["changed_files"]
         pr_count += 1
 
         session.query(Review).filter_by(pr_number=raw["number"]).delete()
