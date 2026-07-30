@@ -27,6 +27,10 @@ function Chart({ title, data, dataKey, xKey }) {
   );
 }
 
+function sortByPrNumber(data) {
+  return [...data].sort((a, b) => a.pr_number - b.pr_number);
+}
+
 export default function App() {
   const [timeToMerge, setTimeToMerge] = useState([]);
   const [reviewTurnaround, setReviewTurnaround] = useState([]);
@@ -34,9 +38,9 @@ export default function App() {
   const [syncing, setSyncing] = useState(false);
 
   async function loadAll() {
-    setTimeToMerge(await getMetric("/metrics/time-to-merge"));
-    setReviewTurnaround(await getMetric("/metrics/review-turnaround"));
-    setPrSize(await getMetric("/metrics/pr-size"));
+    setTimeToMerge(sortByPrNumber(await getMetric("/metrics/time-to-merge")));
+    setReviewTurnaround(sortByPrNumber(await getMetric("/metrics/review-turnaround")));
+    setPrSize(sortByPrNumber(await getMetric("/metrics/pr-size")));
   }
 
   async function handleSync() {
