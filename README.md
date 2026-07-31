@@ -24,6 +24,6 @@ frontend -> http://localhost:5173
 cd backend && python -m pytest -v
 \`\`\`
 
-##notes
+## notes
 
 so slow need to fix
