@@ -3,8 +3,12 @@ from sqlalchemy.orm import Session
 from app.models import PullRequest, Review
 
 
-def time_to_merge_hours(session: Session) -> list[dict]:
-    prs = session.query(PullRequest).filter(PullRequest.merged_at.isnot(None)).all()
+def time_to_merge_hours(session: Session, repo_id: int) -> list[dict]:
+    prs = (
+        session.query(PullRequest)
+        .filter(PullRequest.merged_at.isnot(None), PullRequest.repo_id == repo_id)
+        .all()
+    )
     return [
         {
             "pr_number": pr.number,
@@ -14,13 +18,13 @@ def time_to_merge_hours(session: Session) -> list[dict]:
     ]
 
 
-def review_turnaround_hours(session: Session) -> list[dict]:
-    prs = session.query(PullRequest).all()
+def review_turnaround_hours(session: Session, repo_id: int) -> list[dict]:
+    prs = session.query(PullRequest).filter(PullRequest.repo_id == repo_id).all()
     results = []
     for pr in prs:
         first_review = (
             session.query(Review)
-            .filter(Review.pr_number == pr.number)
+            .filter(Review.pull_request_id == pr.id)
             .order_by(Review.submitted_at.asc())
             .first()
         )
@@ -31,8 +35,12 @@ def review_turnaround_hours(session: Session) -> list[dict]:
     return results
 
 
-def pr_size_distribution(session: Session) -> list[dict]:
-    prs = session.query(PullRequest).all()
+def pr_size_distribution(session: Session, repo_id: int) -> list[dict]:
+    prs = (
+        session.query(PullRequest)
+        .filter(PullRequest.repo_id == repo_id)
+        .all()
+    )
     return [
         {
             "pr_number": pr.number,
