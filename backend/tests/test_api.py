@@ -3,17 +3,22 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app.db import Base
 from app.main import app, get_session
 from app.rate_limit import reset_rate_limits
 
+engine = create_engine(
+    "sqlite:///:memory:",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+Base.metadata.create_all(engine)
+TestSessionLocal = sessionmaker(bind=engine)
 
 def _override_session():
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    db = Session()
+    db = TestSessionLocal()
     try:
         yield db
     finally:
@@ -87,6 +92,6 @@ def test_metrics_endpoints_return_empty_lists_when_no_data():
         created = client.post("/repos", json={"owner": "octocat", "name": "hello"}).json()
 
     repo_id = created["id"]
-    assert client.get(f"/metrics/time-to-merge/{repo_id}").json() == []
-    assert client.get(f"/metrics/review-turnaround/{repo_id}").json() == []
-    assert client.get(f"/metrics/pr-size/{repo_id}").json() == []
+    assert client.get(f"/metrics/time-to-merge?repo_id={repo_id}").json() == []
+    assert client.get(f"/metrics/review-turnaround?repo_id={repo_id}").json() == []
+    assert client.get(f"/metrics/pr-size?repo_id={repo_id}").json() == []
