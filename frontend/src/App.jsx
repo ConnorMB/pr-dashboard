@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getMetric, triggerSync } from "./api";
+import { getMetric } from "./api";
 
 function Chart({ title, data, dataKey, xKey }) {
   return (
@@ -43,6 +43,7 @@ export default function App() {
     setPrSize(sortByPrNumber(await getMetric("/metrics/pr-size")));
   }
 
+  ```
   async function handleSync() {
     setSyncing(true);
     try {
@@ -52,6 +53,7 @@ export default function App() {
       setSyncing(false);
     }
   }
+  ```
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "2rem" }}>
@@ -68,4 +70,6 @@ export default function App() {
       <Chart title="PR size (lines changed)" data={prSize} dataKey="lines_changed" xKey="pr_number" />
     </div>
   );
+  
+
 }

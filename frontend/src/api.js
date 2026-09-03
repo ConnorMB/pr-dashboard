@@ -23,7 +23,7 @@ export async function createOrSyncRepo(owner, name) {
   return response.json();
 }
 
-// checks in on a repo's sync status, this is what gets polled
+// checks in on a repo's sync status
 export async function getRepoStatus(repoId) {
   const response = await fetch(`${API_URL}/repos/${repoId}`);
   if (!response.ok) throw new Error("could not check repo status");
