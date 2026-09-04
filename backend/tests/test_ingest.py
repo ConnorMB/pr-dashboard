@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from app.ingest import sync_repository, run_repository_sync
+from app.ingest import sync_repository, run_repository_sync, MAX_PRS_PER_SYNC
 from app.models import PullRequest, Review, Repository
 
 
@@ -50,16 +50,14 @@ def test_sync_repository_is_idempotent(session):
     assert session.query(PullRequest).filter_by(repo_id=repo.id).count() == 1
     assert session.query(Review).count() == 1
 
-def test_sync_repository_caps_at_max_prs(session):
+def test_sync_repository_requests_max_prs_cap(session):
     repo = _make_repo(session)
-    many_prs = [{**FAKE_PRS[0], "number": i} for i in range(1, 250)]
-    with patch("app.ingest.fetch_pull_requests", return_value=many_prs), patch(
+    with patch("app.ingest.fetch_pull_requests", return_value=FAKE_PRS) as mock_fetch, patch(
         "app.ingest.fetch_pull_request_detail", return_value=FAKE_DETAIL
     ), patch("app.ingest.fetch_reviews", return_value=FAKE_REVIEWS):
-        result = sync_repository(session, repo.id, "octocat", "hello", token=None)
+        sync_repository(session, repo.id, "octocat", "hello", token=None)
 
-    assert result["pull_requests"] == 200
-    assert session.query(PullRequest).filter_by(repo_id=repo.id).count() == 200
+    mock_fetch.assert_called_once_with("octocat", "hello", None, max_results=MAX_PRS_PER_SYNC)
 
 def test_run_repository_sync_marks_repo_ready(session):
     repo = _make_repo(session)

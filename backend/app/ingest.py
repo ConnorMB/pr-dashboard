@@ -12,7 +12,7 @@ def _parse(ts: str | None) -> datetime | None:
 
 
 def sync_repository(session: Session,repo_id: int, owner: str, name: str, token: str | None) -> dict:
-    raw_prs = fetch_pull_requests(owner, name, token)[:MAX_PRS_PER_SYNC]
+    raw_prs = fetch_pull_requests(owner, name, token,max_results=MAX_PRS_PER_SYNC)
     pr_count = 0
     review_count = 0
 

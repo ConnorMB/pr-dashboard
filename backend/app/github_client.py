@@ -10,7 +10,7 @@ def _headers(token: str | None) -> dict[str, str]:
     return headers
 
 
-def fetch_pull_requests(owner: str, repo: str, token: str | None) -> list[dict]:
+def fetch_pull_requests(owner: str, repo: str, token: str | None, max_results: int | None = None) -> list[dict]:
     results: list[dict] = []
     url = f"{BASE_URL}/repos/{owner}/{repo}/pulls"
     params = {"state": "all", "per_page": "100", "page": "1"}
@@ -30,6 +30,8 @@ def fetch_pull_requests(owner: str, repo: str, token: str | None) -> list[dict]:
                         "closed_at": raw["closed_at"],
                     }
                 )
+                if max_results is not None and len(results) >= max_results:
+                    return results
 
             next_url = response.links.get("next", {}).get("url")
             url = next_url
