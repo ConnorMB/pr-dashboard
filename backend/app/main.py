@@ -17,6 +17,8 @@ from app.models import Repository
 from app.rate_limit import is_rate_limited
 from app.repositories import get_or_create_repository
 from app.schemas import CreateRepoRequest
+from dotenv import load_dotenv
+load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
