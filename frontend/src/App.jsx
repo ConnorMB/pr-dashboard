@@ -48,9 +48,9 @@ export default function App() {
   const pollAttempts = useState(0);
 
   async function loadMetrics(repoId) {
-    setTimeToMerge(sortByPrNumber(await getMetric("/metrics/time-to-merge")));
-    setReviewTurnaround(sortByPrNumber(await getMetric("/metrics/review-turnaround")));
-    setPrSize(sortByPrNumber(await getMetric("/metrics/pr-size")));
+    setTimeToMerge(sortByPrNumber(await getMetric("/metrics/time-to-merge", repoId)));
+    setReviewTurnaround(sortByPrNumber(await getMetric("/metrics/review-turnaround", repoId)));
+    setPrSize(sortByPrNumber(await getMetric("/metrics/pr-size", repoId)));
   }
 
   // polling loop, checks repo status until ready/error/timeout
