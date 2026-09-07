@@ -1,5 +1,5 @@
 from unittest.mock import patch
-
+from datetime import datetime, timezone
 from app.ingest import sync_repository, run_repository_sync, MAX_PRS_PER_SYNC
 from app.models import PullRequest, Review, Repository
 
@@ -10,6 +10,7 @@ FAKE_PRS = [
         "title": "Fix bug",
         "author": "octocat",
         "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T18:00:00Z",
         "merged_at": "2026-01-02T00:00:00Z",
         "closed_at": "2026-01-02T00:00:00Z",
     }
@@ -78,3 +79,13 @@ def test_run_repository_sync_marks_repo_error_on_failure(session):
     session.refresh(repo)
     assert repo.status == "error"
     assert repo.error_message == "GitHub API down"
+
+def test_sync_repository_persists_updated_at(session):
+    repo = _make_repo(session)
+    with patch("app.ingest.fetch_pull_requests", return_value=FAKE_PRS), patch(
+        "app.ingest.fetch_pull_request_detail", return_value=FAKE_DETAIL
+    ), patch("app.ingest.fetch_reviews", return_value=FAKE_REVIEWS) :
+        sync_repository(session, repo.id, "octocat", "hello", token=None)
+
+    pr = session.query(PullRequest).filter_by(repo_id=repo.id, number=1).one()
+    assert pr.updated_at == datetime(2026,1,1,18,0)
