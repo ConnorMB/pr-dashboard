@@ -26,6 +26,7 @@ def fetch_pull_requests(owner: str, repo: str, token: str | None, max_results: i
                         "title": raw["title"],
                         "author": raw["user"]["login"],
                         "created_at": raw["created_at"],
+                        "updated_at": raw["updated_at"],
                         "merged_at": raw["merged_at"],
                         "closed_at": raw["closed_at"],
                     }
