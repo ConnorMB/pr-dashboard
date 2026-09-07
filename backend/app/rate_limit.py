@@ -4,8 +4,6 @@ from datetime import datetime, timedelta, timezone
 WINDOW = timedelta(hours=1)
 MAX_REQUESTS_PER_WINDOW = 3
 
-# In-process only — fine for a single Render instance, per Global Constraints.
-# Would need a shared store (e.g. Redis) if this ever ran on multiple instances.
 _request_log: dict[str, list[datetime]] = defaultdict(list)
 
 
