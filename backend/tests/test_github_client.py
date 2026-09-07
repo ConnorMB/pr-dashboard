@@ -15,6 +15,7 @@ def test_fetch_pull_requests_single_page():
                     "title": "Fix bug",
                     "user": {"login": "octocat"},
                     "created_at": "2026-01-01T00:00:00Z",
+                    "updated_at": "2026-01-05T00:00:00Z",
                     "merged_at": "2026-01-02T00:00:00Z",
                     "closed_at": "2026-01-02T00:00:00Z",
                     "additions": 10,
@@ -31,7 +32,7 @@ def test_fetch_pull_requests_single_page():
     assert len(prs) == 1
     assert prs[0]["number"] == 1
     assert prs[0]["author"] == "octocat"
-
+    assert prs[0]["updated_at"] == "2026-01-05T00:00:00Z"
 
 @respx.mock
 def test_fetch_pull_requests_follows_pagination():
@@ -42,7 +43,7 @@ def test_fetch_pull_requests_follows_pagination():
         return_value=httpx.Response(
             200,
             json=[{"number": i, "title": "t", "user": {"login": "a"},
-                    "created_at": "2026-01-01T00:00:00Z", "merged_at": None,
+                    "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-05T00:00:00Z", "merged_at": None,
                     "closed_at": None, "additions": 0, "deletions": 0,
                     "changed_files": 0} for i in range(1, 101)],
             headers={"Link": '<https://api.github.com/repos/octocat/hello/pulls?state=all&per_page=100&page=2>; rel="next"'},
@@ -55,7 +56,7 @@ def test_fetch_pull_requests_follows_pagination():
         return_value=httpx.Response(
             200,
             json=[{"number": 101, "title": "t", "user": {"login": "a"},
-                    "created_at": "2026-01-01T00:00:00Z", "merged_at": None,
+                    "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-05T00:00:00Z", "merged_at": None,
                     "closed_at": None, "additions": 0, "deletions": 0,
                     "changed_files": 0}],
         )
@@ -97,7 +98,7 @@ def test_fetch_pull_requests_stops_at_max_results():
         return_value=httpx.Response(
             200,
             json=[{"number": i, "title": "t", "user": {"login": "a"},
-                    "created_at": "2026-01-01T00:00:00Z", "merged_at": None,
+                    "created_at": "2026-01-01T00:00:00Z", "updated_at": "2026-01-05T00:00:00Z", "merged_at": None,
                     "closed_at": None, "additions": 0, "deletions": 0,
                     "changed_files": 0} for i in range(1, 101)],
             headers={"Link": '<https://api.github.com/repos/octocat/hello/pulls?state=all&per_page=100&page=2>; rel="next"'},
