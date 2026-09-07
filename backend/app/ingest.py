@@ -28,6 +28,7 @@ def sync_repository(session: Session,repo_id: int, owner: str, name: str, token:
         existing.title = raw["title"]
         existing.author = raw["author"]
         existing.created_at = _parse(raw["created_at"])
+        existing.updated_at = _parse(raw["updated_at"])
         existing.merged_at = _parse(raw["merged_at"])
         existing.closed_at = _parse(raw["closed_at"])
         existing.additions = detail["additions"]
