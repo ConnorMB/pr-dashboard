@@ -101,4 +101,4 @@ def test_stale_open_prs(session):
 
     result = stale_open_prs(session, repo.id, now = _dt(2026, 1, 20, 0, 0), min_inactive_days = 14)
 
-    assert result == [{"pr_number": 2, "title": "inactive", "days_inactive": 14}]
+    assert result == [{"pr_number": 2, "title": "inactive", "author": "x", "days_inactive": 14}]
