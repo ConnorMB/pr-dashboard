@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-
 from app.models import PullRequest, Review
+from datetime import datetime, timezone
 
 
 def time_to_merge_hours(session: Session, repo_id: int) -> list[dict]:
@@ -49,3 +49,37 @@ def pr_size_distribution(session: Session, repo_id: int) -> list[dict]:
         }
         for pr in prs
     ]
+
+def stale_open_prs(session: Session, repo_id: int, now: datetime, min_inactive_days: int = 14) -> list[dict]:
+    open_prs = (
+        session.query(PullRequest)
+        .filter(
+            PullRequest.repo_id == repo_id,
+            PullRequest.merged_at.is_(None),
+            PullRequest.closed_at.is_(None),
+        )
+        .all()
+    )
+
+    def _last_activity(pr: PullRequest) -> datetime:
+        last_activity = pr.updated_at if pr.updated_at else pr.created_at
+        if last_activity.tzinfo is None:
+            last_activity = last_activity.replace(tzinfo=timezone.utc)
+        return last_activity
+
+    def _days_inactive(pr: PullRequest) -> int:
+        return (now - _last_activity(pr)).days
+
+    stale = [
+        {
+            "pr_number": pr.number,
+            "title": pr.title,
+            "author": pr.author,
+            "days_inactive": _days_inactive(pr),
+        }
+        for pr in open_prs
+        if _days_inactive(pr) >= min_inactive_days
+    ]
+    return sorted(stale, key=lambda item: item["days_inactive"], reverse=True)
+
+
