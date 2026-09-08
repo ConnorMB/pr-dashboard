@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from app.metrics import pr_size_distribution,review_turnaround_hours,time_to_merge_hours
+from app.metrics import pr_size_distribution,review_turnaround_hours,time_to_merge_hours, stale_open_prs
 from app.models import PullRequest, Review, Repository
 
 
@@ -82,3 +82,23 @@ def test_time_to_merge_hours_only_includes_the_given_repo(session):
     result = time_to_merge_hours(session, repo_a.id)
 
     assert result == [{"pr_number": 1, "hours": 12.0}]
+
+def test_stale_open_prs(session):
+    repo = _make_repo(session)
+    session.add(PullRequest(
+        repo_id=repo.id, number=1, title="recently active", author="x",
+        created_at=_dt(2026, 1, 1, 0, 0), updated_at=_dt(2026, 1, 7, 0, 0), merged_at=None,
+    ))
+    session.add(PullRequest(
+        repo_id=repo.id, number=2, title="inactive", author="x",
+        created_at=_dt(2026, 1, 1, 0, 0), updated_at=_dt(2026, 1, 6, 0, 0), merged_at=None,
+    ))
+    session.add(PullRequest(
+        repo_id=repo.id, number=3, title="merged", author="x",
+        created_at=_dt(2026, 1, 1, 0, 0), updated_at=_dt(2026, 1, 1, 0, 0), merged_at=_dt(2026, 1, 10, 0, 0),
+    ))
+    session.commit()
+
+    result = stale_open_prs(session, repo.id, now = _dt(2026, 1, 20, 0, 0), min_inactive_days = 14)
+
+    assert result == [{"pr_number": 2, "title": "inactive", "days_inactive": 14}]
