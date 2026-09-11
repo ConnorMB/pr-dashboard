@@ -12,12 +12,15 @@ from app.metrics import (
     pr_size_distribution,
     review_turnaround_hours,
     time_to_merge_hours,
+    stale_open_prs
 )
 from app.models import Repository
 from app.rate_limit import is_rate_limited
 from app.repositories import get_or_create_repository
 from app.schemas import CreateRepoRequest
 from dotenv import load_dotenv
+from datetime import datetime, timezone
+
 load_dotenv()
 
 @asynccontextmanager
@@ -106,3 +109,7 @@ def get_review_turnaround(repo_id: int,session: Session = Depends(get_session)) 
 @app.get("/metrics/pr-size")
 def get_pr_size(repo_id: int,session: Session = Depends(get_session)) -> list[dict]:
     return pr_size_distribution(session, repo_id)
+
+@app.get("/metrics/stale-prs")
+def get_stale_prs(repo_id: int, session: Session = Depends(get_session)) -> list[dict]:
+    return stale_open_prs(session, repo_id, datetime.now(timezone.utc))
