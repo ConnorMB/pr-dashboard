@@ -95,3 +95,10 @@ def test_metrics_endpoints_return_empty_lists_when_no_data():
     assert client.get(f"/metrics/time-to-merge?repo_id={repo_id}").json() == []
     assert client.get(f"/metrics/review-turnaround?repo_id={repo_id}").json() == []
     assert client.get(f"/metrics/pr-size?repo_id={repo_id}").json() == []
+
+def test_stale_prs_endpoint_returns_empty_list_when_no_data():
+    with patch("app.main._sync_repository_task"):
+        created = client.post("/repos", json={"owner": "octocat", "name": "hello"}).json()
+
+    repo_id = created["id"]
+    assert client.get(f"/metrics/stale-prs?repo_id={repo_id}").json() == []
